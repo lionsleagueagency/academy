@@ -2,8 +2,9 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import {
-  Play, ArrowRight, Star, Users, TrendingUp, Award,
-  Shield, Zap, Target, BarChart3, BookOpen, CheckCircle2, Loader2
+  ArrowRight, Star, Users, TrendingUp, Award,
+  MessageCircle, Video, Trophy, Gift, Swords, Calendar,
+  BookOpen, CheckCircle2, Loader2, HeartHandshake, Rocket
 } from 'lucide-react';
 import { courseService } from '../services/course.service';
 import type { Course } from '../services/course.service';
@@ -15,27 +16,33 @@ const stats = [
   { icon: TrendingUp, value: '97%', label: 'Taxa de Aprovação' },
 ];
 
-const features = [
+const benefits = [
   {
-    icon: Target,
-    title: 'Conteúdo Direcionado',
-    desc: 'Treinamentos desenvolvidos especificamente para o mercado de agenciamento e performance digital.'
+    icon: MessageCircle,
+    title: 'Suporte diário individual',
+    desc: 'Conselhos para ajudar os criadores a aprimorar seu conteúdo de LIVE com acompanhamento próximo da equipe.',
   },
   {
-    icon: Zap,
-    title: 'Aprendizado Acelerado',
-    desc: 'Método prático com aulas curtas e objetivas para você aplicar imediatamente nos seus projetos.'
+    icon: Video,
+    title: 'Treinamento de habilidades de LIVE',
+    desc: 'Plataforma de cursos para treinar e ajudar os criadores a aprimorar suas habilidades de desempenho nas transmissões.',
   },
   {
-    icon: Shield,
-    title: 'Comunidade Exclusiva',
-    desc: 'Acesso a uma rede de agenciados de alto nível para networking e troca de experiências.'
+    icon: Trophy,
+    title: 'Oportunidades de crescimento',
+    desc: 'Chances de participar de atividades de LIVE para aprender mais, se destacar e se divertir.',
   },
   {
-    icon: BarChart3,
-    title: 'Acompanhamento de Resultados',
-    desc: 'Dashboard completo com métricas do seu progresso e evolução nas habilidades.'
+    icon: Gift,
+    title: 'Outros Benefícios',
+    desc: 'Campanhas mensais, programação de batalhas de live com outros criadores, sorteios de prêmios e bonificações por metas.',
   },
+];
+
+const extraBenefits = [
+  'Campanhas mensais dirigidas pela agência',
+  'Programação de batalhas de live com outros criadores',
+  'Sorteios de prêmios e bonificações por metas',
 ];
 
 const testimonials = [
@@ -75,6 +82,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+      {/* HERO - Convite para fazer parte */}
       <section className="relative overflow-hidden pt-20 pb-24 lg:pt-32 lg:pb-40">
         <div className="absolute inset-0 bg-gradient-mesh opacity-60" />
         <div className="absolute top-20 right-10 w-72 h-72 rounded-full bg-primary/20 blur-[100px] animate-pulse-slow" />
@@ -89,20 +97,20 @@ export default function LandingPage() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border"
               style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
             >
-              <Star className="w-4 h-4 text-amber-500" fill="currentColor" />
-              <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Mais de 2.500 agenciados treinados</span>
+              <Rocket className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Faça parte da Lions League Agency</span>
             </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="font-display text-4xl sm:text-5xl lg:text-7xl font-black leading-[1.1] mb-6"
+              className="font-display text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] mb-6"
             >
-              Eleve seu{' '}
-              <span className="text-gradient">Potencial</span>
+              Transforme suas{' '}
+              <span className="text-gradient">LIVES</span>
               <br />
-              ao Próximo Nível
+              em resultados reais
             </motion.h1>
 
             <motion.p
@@ -112,8 +120,7 @@ export default function LandingPage() {
               className="text-lg sm:text-xl mb-10 max-w-2xl mx-auto leading-relaxed"
               style={{ color: 'var(--text-secondary)' }}
             >
-              A plataforma de treinamento exclusiva da Lions League Agency.
-              Domine as habilidades que os top agenciados usam para escalar resultados.
+              Junte-se à Lions League Agency e tenha acesso a suporte individual, treinamentos exclusivos e oportunidades de crescimento no mundo das transmissões ao vivo.
             </motion.p>
 
             <motion.div
@@ -122,52 +129,100 @@ export default function LandingPage() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
-              <Link
-                to="/login"
+              <a
+                href="https://www.tiktok.com/t/ZSuWaUkHo/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="group flex items-center gap-2 px-8 py-4 rounded-2xl text-white font-bold text-lg bg-gradient-primary shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 hover:scale-105 transition-all"
               >
-                Começar Agora
+                Seja um agenciado
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <button className="flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold border hover:scale-105 transition-all"
-                style={{ background: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--text)' }}
-              >
-                <Play className="w-5 h-5" />
-                Ver Demonstração
-              </button>
+              </a>
             </motion.div>
           </div>
+        </div>
+      </section>
 
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="mt-16 lg:mt-24 relative"
-          >
-            <div className="relative rounded-3xl overflow-hidden shadow-2xl border"
-              style={{ borderColor: 'var(--border)' }}
+      {/* BENEFÍCIOS */}
+      <section className="py-24" style={{ background: 'var(--surface)' }}>
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="font-display text-3xl sm:text-4xl font-bold mb-4"
             >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-10" />
-              <img
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&q=80"
-                alt="Plataforma"
-                className="w-full aspect-[16/9] object-cover"
-              />
-              <div className="absolute bottom-6 left-6 z-20 flex items-center gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
-                  <Play className="w-6 h-6 text-white ml-1" fill="white" />
+              Por que ser um <span className="text-gradient">Agenciado?</span>
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              Benefícios exclusivos para quem faz parte da Lions League Agency
+            </motion.p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {benefits.map((benefit, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="p-6 rounded-2xl border hover:shadow-lg transition-all group"
+                style={{ background: 'var(--bg)', borderColor: 'var(--border)' }}
+              >
+                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <benefit.icon className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-white">
-                  <p className="font-semibold">Conheça a Plataforma</p>
-                  <p className="text-sm text-white/80">2:34 minutos</p>
+                <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>{benefit.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{benefit.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Outros benefícios */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-12 p-8 rounded-2xl border"
+            style={{ background: 'var(--bg)', borderColor: 'var(--border)' }}
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <HeartHandshake className="w-6 h-6 text-primary" />
+              <h3 className="font-semibold text-xl" style={{ color: 'var(--text)' }}>Outros Benefícios</h3>
+            </div>
+            <div className="grid sm:grid-cols-3 gap-4">
+              {extraBenefits.map((item, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{item}</p>
                 </div>
-              </div>
+              ))}
+            </div>
+            <div className="mt-8 text-center">
+              <a
+                href="https://www.tiktok.com/t/ZSuWaUkHo/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-white font-bold text-lg bg-gradient-primary shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
+              >
+                Seja um agenciado
+                <ArrowRight className="w-5 h-5" />
+              </a>
             </div>
           </motion.div>
         </div>
       </section>
 
-      <section className="py-16 border-y" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
+      {/* STATS */}
+      <section className="py-16 border-y" style={{ borderColor: 'var(--border)', background: 'var(--bg)' }}>
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, i) => (
@@ -188,16 +243,27 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* PLATAFORMA DE CURSOS */}
       <section className="py-24">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border"
+              style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
+            >
+              <BookOpen className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Exclusivo para agenciados</span>
+            </motion.div>
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               className="font-display text-3xl sm:text-4xl font-bold mb-4"
             >
-              Por que a <span className="text-gradient">Lions Academy?</span>
+              Plataforma de <span className="text-gradient">Cursos</span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -206,44 +272,20 @@ export default function LandingPage() {
               transition={{ delay: 0.1 }}
               style={{ color: 'var(--text-secondary)' }}
             >
-              Uma plataforma pensada para quem quer resultados reais no mercado digital
+              Treinamentos exclusivos desenvolvidos para agenciados Lions League aprimorarem suas habilidades de LIVE e alcançarem resultados extraordinários.
             </motion.p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="p-6 rounded-2xl border hover:shadow-lg transition-all group"
-                style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
-              >
-                <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <feature.icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>{feature.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{feature.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24" style={{ background: 'var(--surface)' }}>
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-12">
             <div>
-              <motion.h2
+              <motion.h3
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="font-display text-3xl sm:text-4xl font-bold mb-2"
+                className="font-display text-2xl font-bold mb-2"
               >
-                Treinamentos em <span className="text-gradient">Destaque</span>
-              </motion.h2>
+                Cursos em <span className="text-gradient">Destaque</span>
+              </motion.h3>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -259,7 +301,7 @@ export default function LandingPage() {
               className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold border hover:scale-105 transition-all shrink-0"
               style={{ borderColor: 'var(--border)', color: 'var(--text)' }}
             >
-              Ver Todos
+              Acessar todos os cursos
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -277,7 +319,7 @@ export default function LandingPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   className="group rounded-2xl overflow-hidden border hover:shadow-xl transition-all"
-                  style={{ background: 'var(--bg)', borderColor: 'var(--border)' }}
+                  style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
                 >
                   <div className="relative overflow-hidden">
                     <img
@@ -304,10 +346,26 @@ export default function LandingPage() {
               ))}
             </div>
           )}
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-12 text-center"
+          >
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-white font-bold text-lg bg-gradient-primary shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
+            >
+              Acessar plataforma de cursos
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </motion.div>
         </div>
       </section>
 
-      <section className="py-24 relative overflow-hidden">
+      {/* DEPOIMENTOS */}
+      <section className="py-24 relative overflow-hidden" style={{ background: 'var(--surface)' }}>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-primary/5 blur-[150px]" />
         <div className="relative max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
@@ -330,7 +388,7 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
                 className="p-6 rounded-2xl border"
-                style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
+                style={{ background: 'var(--bg)', borderColor: 'var(--border)' }}
               >
                 <div className="flex gap-1 mb-4">
                   {[...Array(5)].map((_, j) => (
@@ -351,7 +409,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-24" style={{ background: 'var(--surface)' }}>
+      {/* CTA FINAL */}
+      <section className="py-24">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -368,32 +427,40 @@ export default function LandingPage() {
 
             <div className="relative px-8 py-16 lg:px-16 lg:py-20 text-center">
               <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-                Pronto para se tornar um Top Agenciado?
+                Pronto para fazer parte?
               </h2>
               <p className="text-lg text-white/80 mb-8 max-w-xl mx-auto">
-                Junte-se aos agenciados de elite da Lions League e transforme sua carreira no marketing digital.
+                Junte-se à Lions League Agency e transforme suas lives em uma carreira de sucesso.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link
-                  to="/login"
+                <a
+                  href="https://www.tiktok.com/t/ZSuWaUkHo/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="px-8 py-4 rounded-2xl font-bold text-lg bg-white text-primary hover:scale-105 transition-all shadow-xl"
                 >
-                  Acessar Plataforma
+                  Seja um agenciado
+                </a>
+                <Link
+                  to="/login"
+                  className="px-8 py-4 rounded-2xl font-bold text-lg border-2 border-white text-white hover:bg-white hover:text-primary transition-all"
+                >
+                  Acessar plataforma
                 </Link>
               </div>
 
               <div className="flex items-center justify-center gap-6 mt-8">
                 <div className="flex items-center gap-2 text-white/80">
                   <CheckCircle2 className="w-5 h-5" />
-                  <span className="text-sm">Acesso Imediato</span>
+                  <span className="text-sm">Suporte Individual</span>
                 </div>
                 <div className="flex items-center gap-2 text-white/80">
                   <CheckCircle2 className="w-5 h-5" />
-                  <span className="text-sm">Certificado Incluso</span>
+                  <span className="text-sm">Treinamentos Exclusivos</span>
                 </div>
                 <div className="flex items-center gap-2 text-white/80">
                   <CheckCircle2 className="w-5 h-5" />
-                  <span className="text-sm">Comunidade VIP</span>
+                  <span className="text-sm">Oportunidades de Crescimento</span>
                 </div>
               </div>
             </div>
@@ -401,6 +468,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* FOOTER */}
       <footer className="py-12 border-t" style={{ borderColor: 'var(--border)', background: 'var(--bg)' }}>
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -416,7 +484,7 @@ export default function LandingPage() {
               </div>
             </div>
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              2024 Lions League Agency. Todos os direitos reservados.
+              © 2024 Lions League Agency. Todos os direitos reservados.
             </p>
           </div>
         </div>
