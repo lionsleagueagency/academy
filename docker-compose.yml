@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: lla-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: lions_league_academy
+      MYSQL_USER: ${DB_USER:-lla_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-llapassword}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: lla-api
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-lla_user}
+      DB_PASSWORD: ${DB_PASSWORD:-llapassword}
+      DB_NAME: lions_league_academy
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      JWT_EXPIRES_IN: 7d
+      JWT_REFRESH_EXPIRES_IN: 30d
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    volumes:
+      - uploads_data:/app/uploads
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build: .
+    container_name: lla-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  mysql_data:
+  uploads_data:
