@@ -133,13 +133,22 @@ ufw --force enable
 # ============================================
 echo -e "${BLUE}[5/10] Configurando MySQL...${NC}"
 
-# Definir senha root
-mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_ROOT_PASS}';"
-mysql -e "FLUSH PRIVILEGES;"
+# Verificar se MySQL está rodando
+if ! systemctl is-active --quiet mysql; then
+    systemctl start mysql
+    systemctl enable mysql
+fi
+
+# Configurar senha root (compatível com MySQL 8.0)
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_ROOT_PASS}';" 2>/dev/null || \
+mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASS}';" 2>/dev/null || \
+sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_ROOT_PASS}';"
+
+mysql -u root -p"${DB_ROOT_PASS}" -e "FLUSH PRIVILEGES;"
 
 # Criar banco de dados e usuário
 mysql -u root -p"${DB_ROOT_PASS}" -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql -u root -p"${DB_ROOT_PASS}" -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';"
+mysql -u root -p"${DB_ROOT_PASS}" -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_PASS}';"
 mysql -u root -p"${DB_ROOT_PASS}" -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';"
 mysql -u root -p"${DB_ROOT_PASS}" -e "FLUSH PRIVILEGES;"
 
