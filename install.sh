@@ -137,16 +137,33 @@ echo -e "${BLUE}[5/10] Configurando MySQL...${NC}"
 if ! systemctl is-active --quiet mysql; then
     systemctl start mysql
     systemctl enable mysql
+    sleep 2
 fi
 
-# Configurar senha root (compatível com MySQL 8.0)
-mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_ROOT_PASS}';" 2>/dev/null || \
-mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASS}';" 2>/dev/null || \
-sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_ROOT_PASS}';"
+# MySQL 8.0 no Ubuntu usa auth_socket por padrão.
+# Precisamos alterar o plugin de autenticação para mysql_native_password
+# e definir a senha root de forma segura.
 
-mysql -u root -p"${DB_ROOT_PASS}" -e "FLUSH PRIVILEGES;"
+# Passo 1: Alterar plugin do root para mysql_native_password (acessa via socket, sem senha)
+sudo mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_ROOT_PASS}';" 2>/dev/null || \
+sudo mysql -u root -e "UPDATE mysql.user SET plugin='mysql_native_password', authentication_string=CONCAT('*', UPPER(SHA1(UNHEX(SHA1('${DB_ROOT_PASS}'))))) WHERE User='root' AND Host='localhost';" 2>/dev/null || \
+{ echo -e "${YELLOW}Tentando método alternativo para MySQL 8.0...${NC}"; sudo mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '${DB_ROOT_PASS}';"; }
 
-# Criar banco de dados e usuário
+# Passo 2: Recarregar privilégios
+sudo mysql -u root -e "FLUSH PRIVILEGES;"
+
+# Passo 3: Testar login com a nova senha
+if ! mysql -u root -p"${DB_ROOT_PASS}" -e "SELECT 1;" >/dev/null 2>&1; then
+    echo -e "${RED}Erro: Não foi possível autenticar no MySQL com a senha root definida.${NC}"
+    echo -e "${YELLOW}Tente executar manualmente:${NC}"
+    echo "  sudo mysql -u root"
+    echo "  ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'sua_senha';"
+    echo "  FLUSH PRIVILEGES;"
+    echo "  EXIT;"
+    exit 1
+fi
+
+# Passo 4: Criar banco de dados e usuário da aplicação
 mysql -u root -p"${DB_ROOT_PASS}" -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 mysql -u root -p"${DB_ROOT_PASS}" -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_PASS}';"
 mysql -u root -p"${DB_ROOT_PASS}" -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';"
