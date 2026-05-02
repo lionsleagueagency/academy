@@ -25,7 +25,7 @@ APP_DIR="/var/www/academy"
 NODE_VERSION="20"
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}  Lions League Academy - Instalador   ${NC}"
+echo -e "${BLUE}  Overlive Academy - Instalador   ${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
