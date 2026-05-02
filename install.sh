@@ -19,9 +19,9 @@ EMAIL=""
 DB_ROOT_PASS=""
 DB_USER="lla_user"
 DB_PASS=""
-DB_NAME="lions_league_academy"
+DB_NAME="overlive_academy"
 JWT_SECRET=""
-APP_DIR="/var/www/lions-league-academy"
+APP_DIR="/var/www/academy"
 NODE_VERSION="20"
 
 echo -e "${BLUE}========================================${NC}"
@@ -143,7 +143,7 @@ mysql -u root -p"${DB_ROOT_PASS}" -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'lo
 mysql -u root -p"${DB_ROOT_PASS}" -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';"
 mysql -u root -p"${DB_ROOT_PASS}" -e "FLUSH PRIVILEGES;"
 
-echo -e "${GREEN}Banco de dados ${DB_NAME} criado${NC}"
+echo -e "${GREEN}Banco de dados overlive_academy criado${NC}"
 
 # ============================================
 # 6. CLONAR PROJETO
@@ -230,7 +230,7 @@ server {
 
     # Frontend (build estático)
     location / {
-        root /var/www/lions-league-academy/dist;
+        root /var/www/academy/dist;
         try_files $uri $uri/ /index.html;
         index index.html;
 
@@ -309,7 +309,7 @@ echo -e "  API:      ${GREEN}https://${DOMAIN}/api${NC}"
 echo ""
 echo -e "${BLUE}Configurações:${NC}"
 echo -e "  Diretório: ${APP_DIR}"
-echo -e "  Banco:     ${DB_NAME}"
+echo -e "  Banco:     overlive_academy"
 echo -e "  Usuário DB: ${DB_USER}"
 echo ""
 echo -e "${YELLOW}Comandos úteis:${NC}"
