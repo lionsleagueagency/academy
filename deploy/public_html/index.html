@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Lions League Academy</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Plataforma de treinamento da Lions League Agency" />
+    <meta name="theme-color" content="#6C5CE7" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="LL Academy" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Lions League Academy" />
+    <meta name="msapplication-TileColor" content="#6C5CE7" />
+    <meta name="msapplication-navbutton-color" content="#6C5CE7" />
+
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" href="/academy.png" />
+    <link rel="apple-touch-icon" href="/pwa-icon-192.png" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="/assets/index-BpJGWip_.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CP-h2_ct.css">
+  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+  <body>
+    <div id="root">
+      <div class="pwa-splash" id="pwa-splash">
+        <img class="pwa-splash-logo" src="/academy.png" alt="Lions League Academy" />
+        <div class="pwa-splash-text">Lions League</div>
+        <div class="pwa-splash-sub">Academy</div>
+      </div>
+    </div>
+    <div id="error-display" style="position:fixed;top:0;left:0;right:0;background:#dc2626;color:#fff;padding:16px;z-index:99999;font-family:monospace;font-size:12px;white-space:pre-wrap;display:none;"></div>
+    <script>
+      window.onerror = function(msg, url, line, col, err) {
+        var el = document.getElementById('error-display');
+        if (el) { el.style.display = 'block'; el.textContent = msg + '\n' + (err && err.stack ? err.stack : ''); }
+        console.error(msg, err);
+      };
+      window.onunhandledrejection = function(e) {
+        var el = document.getElementById('error-display');
+        if (el) { el.style.display = 'block'; el.textContent = 'Unhandled rejection: ' + e.reason; }
+        console.error('Unhandled rejection:', e.reason);
+      };
+    </script>
+    <!-- PWA Splash Screen -->
+    <style>
+      .pwa-splash {
+        position: fixed; inset: 0; z-index: 9999;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        background: linear-gradient(135deg, #6C5CE7, #00CEC9);
+        transition: opacity 0.3s ease;
+      }
+      .pwa-splash.hide { opacity: 0; pointer-events: none; }
+      .pwa-splash-text { color: white; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 700; margin-top: 16px; }
+      .pwa-splash-sub { color: rgba(255,255,255,0.8); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; margin-top: 4px; }
+      .pwa-splash-logo { width: 120px; height: 120px; border-radius: 28px; -o-object-fit: cover; object-fit: cover; box-shadow: 0 20px 60px rgba(0,0,0,0.35); }
+    </style>
+  </body>
+</html>
