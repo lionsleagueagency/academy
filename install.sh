@@ -129,44 +129,50 @@ ufw allow 5000/tcp
 ufw --force enable
 
 # ============================================
-# 5. CONFIGURAR MySQL
+# 5. CONFIGURAR MARIADB
 # ============================================
-echo -e "${BLUE}[5/10] Configurando MySQL...${NC}"
+echo -e "${BLUE}[5/10] Configurando MariaDB...${NC}"
 
-# Verificar se MySQL está rodando
-if ! systemctl is-active --quiet mysql; then
-    systemctl start mysql
-    systemctl enable mysql
+# Verificar se MariaDB está rodando
+if ! systemctl is-active --quiet mariadb; then
+    systemctl start mariadb
+    systemctl enable mariadb
     sleep 2
 fi
 
-# MySQL 8.0 no Ubuntu usa auth_socket por padrão.
-# Precisamos alterar o plugin de autenticação para mysql_native_password
-# e definir a senha root de forma segura.
-
-# Passo 1: Alterar plugin do root para mysql_native_password (acessa via socket, sem senha)
-sudo mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_ROOT_PASS}';" 2>/dev/null || \
-sudo mysql -u root -e "UPDATE mysql.user SET plugin='mysql_native_password', authentication_string=CONCAT('*', UPPER(SHA1(UNHEX(SHA1('${DB_ROOT_PASS}'))))) WHERE User='root' AND Host='localhost';" 2>/dev/null || \
-{ echo -e "${YELLOW}Tentando método alternativo para MySQL 8.0...${NC}"; sudo mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '${DB_ROOT_PASS}';"; }
+# MariaDB usa socket Unix por padrão. Configurar senha root via socket.
+# Passo 1: Definir senha root
+sudo mariadb -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASS}';" 2>/dev/null || \
+sudo mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASS}';" 2>/dev/null || \
+{ echo -e "${YELLOW}Configurando senha root via mysqladmin...${NC}"; sudo mysqladmin -u root password "${DB_ROOT_PASS}"; }
 
 # Passo 2: Recarregar privilégios
-sudo mysql -u root -e "FLUSH PRIVILEGES;"
+sudo mariadb -u root -e "FLUSH PRIVILEGES;" 2>/dev/null || sudo mysql -u root -e "FLUSH PRIVILEGES;"
 
 # Passo 3: Testar login com a nova senha
-if ! mysql -u root -p"${DB_ROOT_PASS}" -e "SELECT 1;" >/dev/null 2>&1; then
-    echo -e "${RED}Erro: Não foi possível autenticar no MySQL com a senha root definida.${NC}"
-    echo -e "${YELLOW}Tente executar manualmente:${NC}"
-    echo "  sudo mysql -u root"
-    echo "  ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'sua_senha';"
-    echo "  FLUSH PRIVILEGES;"
-    echo "  EXIT;"
-    exit 1
+if ! mariadb -u root -p"${DB_ROOT_PASS}" -e "SELECT 1;" >/dev/null 2>&1; then
+    if ! mysql -u root -p"${DB_ROOT_PASS}" -e "SELECT 1;" >/dev/null 2>&1; then
+        echo -e "${RED}Erro: Não foi possível autenticar no MariaDB com a senha root definida.${NC}"
+        echo -e "${YELLOW}Tente executar manualmente:${NC}"
+        echo "  sudo mariadb -u root"
+        echo "  ALTER USER 'root'@'localhost' IDENTIFIED BY 'sua_senha';"
+        echo "  FLUSH PRIVILEGES;"
+        echo "  EXIT;"
+        exit 1
+    fi
 fi
 
 # Passo 4: Criar banco de dados e usuário da aplicação
+mariadb -u root -p"${DB_ROOT_PASS}" -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || \
 mysql -u root -p"${DB_ROOT_PASS}" -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql -u root -p"${DB_ROOT_PASS}" -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED WITH mysql_native_password BY '${DB_PASS}';"
+
+mariadb -u root -p"${DB_ROOT_PASS}" -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';" 2>/dev/null || \
+mysql -u root -p"${DB_ROOT_PASS}" -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';"
+
+mariadb -u root -p"${DB_ROOT_PASS}" -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';" 2>/dev/null || \
 mysql -u root -p"${DB_ROOT_PASS}" -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';"
+
+mariadb -u root -p"${DB_ROOT_PASS}" -e "FLUSH PRIVILEGES;" 2>/dev/null || \
 mysql -u root -p"${DB_ROOT_PASS}" -e "FLUSH PRIVILEGES;"
 
 echo -e "${GREEN}Banco de dados overlive_academy criado${NC}"
