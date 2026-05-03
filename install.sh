@@ -17,9 +17,9 @@ NC='\033[0m'
 DOMAIN=""
 EMAIL=""
 DB_ROOT_PASS=""
-DB_USER="lla_user"
-DB_PASS=""
-DB_NAME="overlive_academy"
+DB_USER="academy"
+DB_PASS="NCdAD4ZscrLdbs22"
+DB_NAME="academy"
 JWT_SECRET=""
 APP_DIR="/var/www/academy"
 NODE_VERSION="20"
@@ -129,9 +129,9 @@ ufw allow 5000/tcp
 ufw --force enable
 
 # ============================================
-# 5. CONFIGURAR MARIADB
+# 5. CONFIGURAR MARIADB (JÁ CONFIGURADO - PULAR)
 # ============================================
-echo -e "${BLUE}[5/10] Configurando MariaDB...${NC}"
+echo -e "${BLUE}[5/10] Verificando MariaDB...${NC}"
 
 # Verificar se MariaDB está rodando
 if ! systemctl is-active --quiet mariadb; then
@@ -140,42 +140,16 @@ if ! systemctl is-active --quiet mariadb; then
     sleep 2
 fi
 
-# MariaDB usa socket Unix por padrão. Configurar senha root via socket.
-# Passo 1: Definir senha root
-sudo mariadb -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASS}';" 2>/dev/null || \
-sudo mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASS}';" 2>/dev/null || \
-{ echo -e "${YELLOW}Configurando senha root via mysqladmin...${NC}"; sudo mysqladmin -u root password "${DB_ROOT_PASS}"; }
-
-# Passo 2: Recarregar privilégios
-sudo mariadb -u root -e "FLUSH PRIVILEGES;" 2>/dev/null || sudo mysql -u root -e "FLUSH PRIVILEGES;"
-
-# Passo 3: Testar login com a nova senha
-if ! mariadb -u root -p"${DB_ROOT_PASS}" -e "SELECT 1;" >/dev/null 2>&1; then
-    if ! mysql -u root -p"${DB_ROOT_PASS}" -e "SELECT 1;" >/dev/null 2>&1; then
-        echo -e "${RED}Erro: Não foi possível autenticar no MariaDB com a senha root definida.${NC}"
-        echo -e "${YELLOW}Tente executar manualmente:${NC}"
-        echo "  sudo mariadb -u root"
-        echo "  ALTER USER 'root'@'localhost' IDENTIFIED BY 'sua_senha';"
-        echo "  FLUSH PRIVILEGES;"
-        echo "  EXIT;"
+# Testar conexão com o banco existente
+if ! mariadb -u "${DB_USER}" -p"${DB_PASS}" -e "USE ${DB_NAME}; SELECT 1;" >/dev/null 2>&1; then
+    if ! mysql -u "${DB_USER}" -p"${DB_PASS}" -e "USE ${DB_NAME}; SELECT 1;" >/dev/null 2>&1; then
+        echo -e "${RED}Erro: Não foi possível conectar ao banco ${DB_NAME} com o usuário ${DB_USER}.${NC}"
+        echo -e "${YELLOW}Verifique se o banco foi criado e o usuário tem permissões.${NC}"
         exit 1
     fi
 fi
 
-# Passo 4: Criar banco de dados e usuário da aplicação
-mariadb -u root -p"${DB_ROOT_PASS}" -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || \
-mysql -u root -p"${DB_ROOT_PASS}" -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-
-mariadb -u root -p"${DB_ROOT_PASS}" -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';" 2>/dev/null || \
-mysql -u root -p"${DB_ROOT_PASS}" -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';"
-
-mariadb -u root -p"${DB_ROOT_PASS}" -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';" 2>/dev/null || \
-mysql -u root -p"${DB_ROOT_PASS}" -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';"
-
-mariadb -u root -p"${DB_ROOT_PASS}" -e "FLUSH PRIVILEGES;" 2>/dev/null || \
-mysql -u root -p"${DB_ROOT_PASS}" -e "FLUSH PRIVILEGES;"
-
-echo -e "${GREEN}Banco de dados overlive_academy criado${NC}"
+echo -e "${GREEN}Banco de dados ${DB_NAME} conectado com sucesso${NC}"
 
 # ============================================
 # 6. CLONAR PROJETO
@@ -341,7 +315,7 @@ echo -e "  API:      ${GREEN}https://${DOMAIN}/api${NC}"
 echo ""
 echo -e "${BLUE}Configurações:${NC}"
 echo -e "  Diretório: ${APP_DIR}"
-echo -e "  Banco:     overlive_academy"
+echo -e "  Banco:     ${DB_NAME}"
 echo -e "  Usuário DB: ${DB_USER}"
 echo ""
 echo -e "${YELLOW}Comandos úteis:${NC}"
