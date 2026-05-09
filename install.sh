@@ -21,7 +21,7 @@ DB_USER="academy"
 DB_PASS="NCdAD4ZscrLdbs22"
 DB_NAME="academy"
 JWT_SECRET=""
-APP_DIR="/var/www/academy"
+APP_DIR="/var/www/clients/client1/web2/home/academyssh/web"
 NODE_VERSION="20"
 
 echo -e "${BLUE}========================================${NC}"
