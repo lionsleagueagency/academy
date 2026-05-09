@@ -13,15 +13,22 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Configurações padrão
+# ============================================
+# CONFIGURAÇÕES
+# ============================================
+
 DOMAIN=""
 EMAIL=""
 DB_ROOT_PASS=""
-DB_USER="academy"
-DB_PASS="NCdAD4ZscrLdbs22"
-DB_NAME="academy"
+DB_USER="c1useracademy"
+DB_PASS="wcYq9KBo!mVwM"
+DB_NAME="c1academydb"
 JWT_SECRET=""
-APP_DIR="/var/www/clients/client1/web2/home/academyssh/web"
+
+APP_DIR="/var/www/clients/client1/web2/home/academyssh"
+WEB_DIR="${APP_DIR}/web"
+PROJECT_DIR="${APP_DIR}/app"
+
 NODE_VERSION="20"
 
 echo -e "${BLUE}========================================${NC}"
@@ -29,29 +36,40 @@ echo -e "${BLUE}  Overlive Academy - Instalador   ${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
-# Verificar se é root
+# ============================================
+# VERIFICAR ROOT
+# ============================================
+
 if [ "$EUID" -ne 0 ]; then
     echo -e "${RED}Erro: Execute como root (sudo)${NC}"
     exit 1
 fi
 
-# Verificar Ubuntu
+# ============================================
+# VERIFICAR UBUNTU
+# ============================================
+
 if ! grep -q "Ubuntu" /etc/os-release; then
     echo -e "${YELLOW}Aviso: Este script foi testado no Ubuntu Server${NC}"
     read -p "Continuar mesmo assim? (s/N): " confirm
+
     if [[ ! "$confirm" =~ ^[Ss]$ ]]; then
         exit 1
     fi
 fi
 
-# Coletar informações do usuário
+# ============================================
+# COLETAR DADOS
+# ============================================
+
 echo -e "${YELLOW}--- Configurações do Servidor ---${NC}"
+
 read -p "Domínio (ex: academy.seusite.com): " DOMAIN
 read -p "Seu e-mail (para SSL Let's Encrypt): " EMAIL
-read -sp "Senha root do MySQL: " DB_ROOT_PASS
-echo ""
+
 read -sp "Senha do banco de dados da aplicação: " DB_PASS
 echo ""
+
 read -sp "Senha JWT (deixe em branco para gerar automaticamente): " JWT_INPUT
 echo ""
 
@@ -66,10 +84,13 @@ echo ""
 echo -e "${YELLOW}--- Resumo da Instalação ---${NC}"
 echo "Domínio: $DOMAIN"
 echo "E-mail: $EMAIL"
-echo "Diretório: $APP_DIR"
+echo "Projeto: $PROJECT_DIR"
+echo "Publico: $WEB_DIR"
 echo "Banco de dados: $DB_NAME"
 echo ""
+
 read -p "Confirmar instalação? (s/N): " confirm
+
 if [[ ! "$confirm" =~ ^[Ss]$ ]]; then
     echo "Instalação cancelada."
     exit 1
@@ -78,20 +99,24 @@ fi
 # ============================================
 # 1. ATUALIZAR SISTEMA
 # ============================================
+
 echo ""
 echo -e "${BLUE}[1/10] Atualizando sistema...${NC}"
+
 apt update && apt upgrade -y
 
 # ============================================
 # 2. INSTALAR DEPENDÊNCIAS
 # ============================================
+
 echo -e "${BLUE}[2/10] Instalando dependências...${NC}"
+
 apt install -y \
     curl \
     wget \
     git \
     nginx \
-    mysql-server \
+    mariadb-server \
     certbot \
     python3-certbot-nginx \
     ufw \
@@ -104,74 +129,83 @@ apt install -y \
 # ============================================
 # 3. INSTALAR NODE.JS
 # ============================================
+
 echo -e "${BLUE}[3/10] Instalando Node.js ${NODE_VERSION}...${NC}"
+
 curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -
+
 apt install -y nodejs
 
-# Verificar instalação
 node_version=$(node --version)
 npm_version=$(npm --version)
+
 echo -e "${GREEN}Node.js ${node_version} instalado${NC}"
 echo -e "${GREEN}npm ${npm_version} instalado${NC}"
 
-# Instalar PM2 globalmente
 npm install -g pm2
 
 # ============================================
 # 4. CONFIGURAR FIREWALL
 # ============================================
+
 echo -e "${BLUE}[4/10] Configurando firewall...${NC}"
+
 ufw default deny incoming
 ufw default allow outgoing
+
 ufw allow ssh
 ufw allow 'Nginx Full'
 ufw allow 5000/tcp
+
 ufw --force enable
 
 # ============================================
-# 5. CONFIGURAR MARIADB (JÁ CONFIGURADO - PULAR)
+# 5. VERIFICAR MARIADB
 # ============================================
+
 echo -e "${BLUE}[5/10] Verificando MariaDB...${NC}"
 
-# Verificar se MariaDB está rodando
 if ! systemctl is-active --quiet mariadb; then
     systemctl start mariadb
     systemctl enable mariadb
     sleep 2
 fi
 
-# Testar conexão com o banco existente
+# Teste do banco
 if ! mariadb -u "${DB_USER}" -p"${DB_PASS}" -e "USE ${DB_NAME}; SELECT 1;" >/dev/null 2>&1; then
-    if ! mysql -u "${DB_USER}" -p"${DB_PASS}" -e "USE ${DB_NAME}; SELECT 1;" >/dev/null 2>&1; then
-        echo -e "${RED}Erro: Não foi possível conectar ao banco ${DB_NAME} com o usuário ${DB_USER}.${NC}"
-        echo -e "${YELLOW}Verifique se o banco foi criado e o usuário tem permissões.${NC}"
-        exit 1
-    fi
+    echo -e "${RED}Erro ao conectar no banco.${NC}"
+    echo -e "${YELLOW}Verifique usuário, senha e banco.${NC}"
+    exit 1
 fi
 
-echo -e "${GREEN}Banco de dados ${DB_NAME} conectado com sucesso${NC}"
+echo -e "${GREEN}Banco conectado com sucesso${NC}"
 
 # ============================================
 # 6. CLONAR PROJETO
 # ============================================
+
 echo -e "${BLUE}[6/10] Clonando projeto do GitHub...${NC}"
 
-if [ -d "$APP_DIR" ]; then
-    echo -e "${YELLOW}Diretório existente encontrado. Removendo...${NC}"
-    rm -rf "$APP_DIR"
+mkdir -p "$PROJECT_DIR"
+mkdir -p "$WEB_DIR"
+
+# Limpar projeto antigo
+if [ -d "$PROJECT_DIR" ]; then
+    rm -rf "${PROJECT_DIR:?}"/*
 fi
 
-git clone https://github.com/lionsleagueagency/lions-league-academy.git "$APP_DIR"
-cd "$APP_DIR"
+git clone https://github.com/lionsleagueagency/lions-league-academy.git "$PROJECT_DIR"
+
+cd "$PROJECT_DIR"
 
 # ============================================
 # 7. CONFIGURAR BACKEND
 # ============================================
+
 echo -e "${BLUE}[7/10] Configurando backend...${NC}"
 
-cd "$APP_DIR/backend"
+cd "$PROJECT_DIR/backend"
 
-# Criar .env
 cat > .env <<EOF
 NODE_ENV=production
 PORT=5000
@@ -192,87 +226,119 @@ JWT_REFRESH_EXPIRES_IN=30d
 CORS_ORIGIN=https://${DOMAIN}
 EOF
 
-# Instalar dependências
 npm install --production
 
-# Criar pasta uploads
 mkdir -p uploads
 chmod 755 uploads
 
-# Importar schema do banco
-if [ -f "$APP_DIR/database/schema.sql" ]; then
-    echo -e "${BLUE}Importando schema do banco de dados...${NC}"
-    mysql -u "${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" < "$APP_DIR/database/schema.sql"
+# Importar schema
+if [ -f "$PROJECT_DIR/database/schema.sql" ]; then
+    echo -e "${BLUE}Importando schema do banco...${NC}"
+
+    mysql -u "${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" < "$PROJECT_DIR/database/schema.sql"
+
     echo -e "${GREEN}Schema importado com sucesso${NC}"
 fi
 
-# Iniciar com PM2
+# PM2
+pm2 delete lla-api >/dev/null 2>&1 || true
+
 pm2 start src/server.js --name "lla-api"
+
 pm2 save
 pm2 startup systemd -u root --hp /root
 
 # ============================================
 # 8. BUILDAR FRONTEND
 # ============================================
+
 echo -e "${BLUE}[8/10] Buildando frontend...${NC}"
 
-cd "$APP_DIR"
+cd "$PROJECT_DIR"
+
 npm install
+
 npm run build
+
+# Limpar pasta publica
+rm -rf "${WEB_DIR:?}"/*
+
+# Copiar build
+cp -r dist/* "$WEB_DIR/"
+
+# Permissões
+chown -R www-data:www-data "$WEB_DIR"
+chmod -R 755 "$WEB_DIR"
 
 # ============================================
 # 9. CONFIGURAR NGINX
 # ============================================
+
 echo -e "${BLUE}[9/10] Configurando Nginx...${NC}"
 
-# Remover configuração default
 rm -f /etc/nginx/sites-enabled/default
 
-# Criar configuração do site
-cat > /etc/nginx/sites-available/lions-league-academy <<'EOF'
+cat > /etc/nginx/sites-available/lions-league-academy <<EOF
 server {
     listen 80;
-    server_name DOMAIN_PLACEHOLDER;
+    server_name ${DOMAIN};
 
-    # Frontend (build estático)
+    root ${WEB_DIR};
+    index index.html;
+
+    # Frontend
     location / {
-        root /var/www/academy/dist;
-        try_files $uri $uri/ /index.html;
-        index index.html;
-
-        # Cache para assets estáticos
-        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|webp)$ {
-            expires 1y;
-            add_header Cache-Control "public, immutable";
-        }
+        try_files \$uri \$uri/ /index.html;
     }
 
-    # API Backend
+    # Cache
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|webp)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Backend API
     location /api/ {
         proxy_pass http://localhost:5000;
+
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
+
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+
+        proxy_cache_bypass \$http_upgrade;
+
         proxy_read_timeout 86400;
     }
 
     # Uploads
     location /uploads/ {
         proxy_pass http://localhost:5000;
+
         proxy_http_version 1.1;
-        proxy_set_header Host $host;
+
+        proxy_set_header Host \$host;
     }
 
     # Gzip
     gzip on;
     gzip_vary on;
     gzip_min_length 1024;
-    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+    gzip_types
+        text/plain
+        text/css
+        application/json
+        application/javascript
+        text/xml
+        application/xml
+        application/xml+rss
+        text/javascript;
 
     # Segurança
     add_header X-Frame-Options "SAMEORIGIN" always;
@@ -281,50 +347,65 @@ server {
 }
 EOF
 
-# Substituir placeholder pelo domínio real
-sed -i "s/DOMAIN_PLACEHOLDER/${DOMAIN}/g" /etc/nginx/sites-available/lions-league-academy
-
-# Ativar site
 ln -sf /etc/nginx/sites-available/lions-league-academy /etc/nginx/sites-enabled/
 
-# Testar e reiniciar Nginx
 nginx -t
+
 systemctl restart nginx
 
 # ============================================
-# 10. CONFIGURAR SSL (Let's Encrypt)
+# 10. CONFIGURAR SSL
 # ============================================
+
 echo -e "${BLUE}[10/10] Configurando SSL...${NC}"
 
-certbot --nginx -d "${DOMAIN}" --non-interactive --agree-tos --email "${EMAIL}"
+certbot --nginx \
+    -d "${DOMAIN}" \
+    --non-interactive \
+    --agree-tos \
+    --email "${EMAIL}"
 
-# Configurar renovação automática
-echo "0 3 * * * root certbot renew --quiet" | crontab -
+# Renovação automática
+(crontab -l 2>/dev/null; echo "0 3 * * * certbot renew --quiet") | crontab -
 
 # ============================================
 # FINALIZAÇÃO
 # ============================================
+
 echo ""
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}   Instalação Concluída com Sucesso!   ${NC}"
 echo -e "${GREEN}========================================${NC}"
+
 echo ""
-echo -e "${BLUE}Acesse sua aplicação:${NC}"
-echo -e "  Frontend: ${GREEN}https://${DOMAIN}${NC}"
-echo -e "  API:      ${GREEN}https://${DOMAIN}/api${NC}"
+echo -e "${BLUE}Acesse:${NC}"
+
+echo -e "Frontend: ${GREEN}https://${DOMAIN}${NC}"
+echo -e "API:      ${GREEN}https://${DOMAIN}/api${NC}"
+
 echo ""
-echo -e "${BLUE}Configurações:${NC}"
-echo -e "  Diretório: ${APP_DIR}"
-echo -e "  Banco:     ${DB_NAME}"
-echo -e "  Usuário DB: ${DB_USER}"
+echo -e "${BLUE}Diretórios:${NC}"
+
+echo -e "Projeto: ${PROJECT_DIR}"
+echo -e "Publico: ${WEB_DIR}"
+
+echo ""
+echo -e "${BLUE}Banco:${NC}"
+
+echo -e "DB Nome: ${DB_NAME}"
+echo -e "DB User: ${DB_USER}"
+
 echo ""
 echo -e "${YELLOW}Comandos úteis:${NC}"
-echo -e "  Ver logs do backend: ${BLUE}pm2 logs lla-api${NC}"
-echo -e "  Reiniciar backend:   ${BLUE}pm2 restart lla-api${NC}"
-echo -e "  Status do backend:   ${BLUE}pm2 status${NC}"
-echo -e "  Restart Nginx:       ${BLUE}systemctl restart nginx${NC}"
+
+echo -e "Logs backend: ${BLUE}pm2 logs lla-api${NC}"
+echo -e "Restart backend: ${BLUE}pm2 restart lla-api${NC}"
+echo -e "Status PM2: ${BLUE}pm2 status${NC}"
+echo -e "Restart Nginx: ${BLUE}systemctl restart nginx${NC}"
+
 echo ""
-echo -e "${YELLOW}JWT_SECRET (salve em local seguro):${NC}"
-echo -e "  ${DB_PASS}"
+echo -e "${YELLOW}JWT_SECRET:${NC}"
+echo -e "${GREEN}${JWT_SECRET}${NC}"
+
 echo ""
 echo -e "${GREEN}Instalação finalizada!${NC}"
