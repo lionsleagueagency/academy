@@ -116,7 +116,7 @@ apt install -y \
     wget \
     git \
     nginx \
-    mariadb-server \
+    mysql-server \
     certbot \
     python3-certbot-nginx \
     ufw \
@@ -160,25 +160,25 @@ ufw allow 5000/tcp
 ufw --force enable
 
 # ============================================
-# 5. VERIFICAR MARIADB
+# 5. VERIFICAR MYSQL
 # ============================================
 
-echo -e "${BLUE}[5/10] Verificando MariaDB...${NC}"
+echo -e "${BLUE}[5/10] Verificando MySQL...${NC}"
 
-if ! systemctl is-active --quiet mariadb; then
-    systemctl start mariadb
-    systemctl enable mariadb
+if ! systemctl is-active --quiet mysql; then
+    systemctl start mysql
+    systemctl enable mysql
     sleep 2
 fi
 
-# Teste do banco
-if ! mariadb -u "${DB_USER}" -p"${DB_PASS}" -e "USE ${DB_NAME}; SELECT 1;" >/dev/null 2>&1; then
-    echo -e "${RED}Erro ao conectar no banco.${NC}"
+# Testar conexão
+if ! mysql -u "${DB_USER}" -p"${DB_PASS}" -e "USE ${DB_NAME}; SELECT 1;" >/dev/null 2>&1; then
+    echo -e "${RED}Erro ao conectar no banco MySQL.${NC}"
     echo -e "${YELLOW}Verifique usuário, senha e banco.${NC}"
     exit 1
 fi
 
-echo -e "${GREEN}Banco conectado com sucesso${NC}"
+echo -e "${GREEN}Banco MySQL conectado com sucesso${NC}"
 
 # ============================================
 # 6. CLONAR PROJETO
