@@ -30,7 +30,21 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# 1. Clonar/atualizar projeto
+# 1. Instalar Node.js se não existir
+echo -e "${BLUE}[0/6] Verificando Node.js...${NC}"
+if ! command -v node &> /dev/null; then
+    echo -e "${YELLOW}Node.js não encontrado. Instalando...${NC}"
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+    apt install -y nodejs
+fi
+node_version=$(node --version)
+echo -e "${GREEN}Node.js ${node_version} instalado${NC}"
+
+if ! command -v pm2 &> /dev/null; then
+    npm install -g pm2
+fi
+
+# 2. Clonar/atualizar projeto
 echo -e "${BLUE}[1/6] Atualizando projeto...${NC}"
 if [ -d "$APP_DIR/.git" ]; then
     cd "$APP_DIR"
@@ -40,7 +54,7 @@ else
     git clone https://github.com/lionsleagueagency/academy.git "$APP_DIR"
 fi
 
-# 2. Configurar backend
+# 3. Configurar backend
 echo -e "${BLUE}[2/6] Configurando backend...${NC}"
 cd "$APP_DIR/backend"
 
@@ -66,7 +80,7 @@ npm install --production
 mkdir -p uploads
 chmod 755 uploads
 
-# 3. Importar schema se banco vazio
+# 4. Importar schema se banco vazio
 echo -e "${BLUE}[3/6] Verificando banco de dados...${NC}"
 TABLE_COUNT=$(mysql -u "${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" -e "SHOW TABLES;" 2>/dev/null | wc -l)
 if [ "$TABLE_COUNT" -lt 5 ]; then
@@ -75,18 +89,18 @@ if [ "$TABLE_COUNT" -lt 5 ]; then
     node "$APP_DIR/backend/src/utils/seed.js" 2>/dev/null || echo -e "${YELLOW}Seed falhou, criando admin manualmente...${NC}"
 fi
 
-# 4. Buildar frontend
+# 5. Buildar frontend
 echo -e "${BLUE}[4/6] Buildando frontend...${NC}"
 cd "$APP_DIR"
 npm install
 npm run build
 
-# 5. Reiniciar backend
+# 6. Reiniciar backend
 echo -e "${BLUE}[5/6] Reiniciando backend...${NC}"
 pm2 restart academy-api 2>/dev/null || pm2 start "$APP_DIR/backend/src/server.js" --name "academy-api"
 pm2 save
 
-# 6. Configurar Nginx
+# 7. Configurar Nginx
 echo -e "${BLUE}[6/6] Configurando Nginx...${NC}"
 cat > /etc/nginx/sites-available/academy << EOF
 server {
