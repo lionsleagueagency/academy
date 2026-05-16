@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Lions League Academy - Script de Deploy
-# Uso: ./deploy.sh
+# Lions League Academy - Deploy Rápido para Produção
+# Uso: sudo bash deploy.sh
 
 set -e
 
@@ -9,45 +9,146 @@ echo "========================================"
 echo " Lions League Academy - Deploy"
 echo "========================================"
 
+# Configurações
+DOMAIN="overlive.com.br"
+APP_DIR="/var/www/clients/client0/web1/home/defaultweb2/web/academy"
+DB_NAME="c1academydb"
+DB_USER="c1useracademy"
+DB_PASS="wcYq9KBo!mVwM"
+
 # Cores
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Verificar se está na pasta correta
-if [ ! -f "package.json" ]; then
-    echo -e "${RED}Erro: Execute este script na raiz do projeto${NC}"
+# Verificar root
+if [ "$EUID" -ne 0 ]; then
+    echo -e "${RED}Execute como root (sudo)${NC}"
     exit 1
 fi
 
-echo -e "${YELLOW}[1/6] Instalando dependências do frontend...${NC}"
-npm install
+# 1. Clonar/atualizar projeto
+echo -e "${BLUE}[1/6] Atualizando projeto...${NC}"
+if [ -d "$APP_DIR/.git" ]; then
+    cd "$APP_DIR"
+    git pull origin main
+else
+    rm -rf "$APP_DIR"
+    git clone https://github.com/lionsleagueagency/academy.git "$APP_DIR"
+fi
 
-echo -e "${YELLOW}[2/6] Buildando frontend...${NC}"
+# 2. Configurar backend
+echo -e "${BLUE}[2/6] Configurando backend...${NC}"
+cd "$APP_DIR/backend"
+
+# Gerar JWT_SECRET se não existir
+if [ ! -f .env ]; then
+    JWT_SECRET=$(openssl rand -base64 32)
+    cat > .env <<EOF
+NODE_ENV=production
+PORT=5000
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=${DB_USER}
+DB_PASSWORD=${DB_PASS}
+DB_NAME=${DB_NAME}
+JWT_SECRET=${JWT_SECRET}
+JWT_EXPIRES_IN=7d
+JWT_REFRESH_EXPIRES_IN=30d
+CORS_ORIGIN=https://${DOMAIN}
+EOF
+fi
+
+npm install --production
+mkdir -p uploads
+chmod 755 uploads
+
+# 3. Importar schema se banco vazio
+echo -e "${BLUE}[3/6] Verificando banco de dados...${NC}"
+TABLE_COUNT=$(mysql -u "${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" -e "SHOW TABLES;" 2>/dev/null | wc -l)
+if [ "$TABLE_COUNT" -lt 5 ]; then
+    echo -e "${YELLOW}Importando schema...${NC}"
+    mysql -u "${DB_USER}" -p"${DB_PASS}" "${DB_NAME}" < "$APP_DIR/database/schema.sql"
+    node "$APP_DIR/backend/src/utils/seed.js" 2>/dev/null || echo -e "${YELLOW}Seed falhou, criando admin manualmente...${NC}"
+fi
+
+# 4. Buildar frontend
+echo -e "${BLUE}[4/6] Buildando frontend...${NC}"
+cd "$APP_DIR"
+npm install
 npm run build
 
-echo -e "${YELLOW}[3/6] Instalando dependências do backend...${NC}"
-cd backend
-npm install --production
-cd ..
+# 5. Reiniciar backend
+echo -e "${BLUE}[5/6] Reiniciando backend...${NC}"
+pm2 restart academy-api 2>/dev/null || pm2 start "$APP_DIR/backend/src/server.js" --name "academy-api"
+pm2 save
 
-echo -e "${YELLOW}[4/6] Verificando variáveis de ambiente...${NC}"
-if [ ! -f "backend/.env" ]; then
-    echo -e "${RED}Aviso: backend/.env não encontrado!${NC}"
-    echo "Copie backend/.env.production para backend/.env e configure"
-    exit 1
-fi
+# 6. Configurar Nginx
+echo -e "${BLUE}[6/6] Configurando Nginx...${NC}"
+cat > /etc/nginx/sites-available/academy << 'EOF'
+server {
+    listen 80;
+    server_name overlive.com.br www.overlive.com.br;
 
-echo -e "${YELLOW}[5/6] Criando pasta de uploads...${NC}"
-mkdir -p backend/uploads
+    root /var/www/clients/client0/web1/home/defaultweb2/web/academy/dist;
+    index index.html;
 
-echo -e "${YELLOW}[6/6] Deploy concluído!${NC}"
+    location /academy {
+        alias /var/www/clients/client0/web1/home/defaultweb2/web/academy/dist;
+        try_files $uri $uri/ /academy/index.html;
+        index index.html;
+    }
+
+    location /academy/api/ {
+        proxy_pass http://127.0.0.1:5000/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Content-Type $content_type;
+        
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Authorization, Content-Type, Accept" always;
+        
+        if ($request_method = 'OPTIONS') {
+            add_header Access-Control-Allow-Origin *;
+            add_header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS";
+            add_header Access-Control-Allow-Headers "Authorization, Content-Type, Accept";
+            add_header Access-Control-Max-Age 86400;
+            return 204;
+        }
+    }
+
+    location /academy/uploads/ {
+        proxy_pass http://127.0.0.1:5000/uploads/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+
+    location /health {
+        proxy_pass http://127.0.0.1:5000/health;
+    }
+}
+EOF
+
+rm -f /etc/nginx/sites-enabled/default
+ln -sf /etc/nginx/sites-available/academy /etc/nginx/sites-enabled/
+
+nginx -t
+systemctl restart nginx
+
 echo ""
-echo -e "${GREEN}Próximos passos:${NC}"
-echo "  1. Configure o Nginx (veja DEPLOY.md)"
-echo "  2. Inicie o backend: cd backend && pm2 start src/server.js --name lla-api"
-echo "  3. Sirva a pasta dist/ com o Nginx"
+echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN}   Deploy Concluído!${NC}"
+echo -e "${GREEN}========================================${NC}"
 echo ""
-echo -e "${GREEN}Ou use Docker:${NC}"
-echo "  docker-compose up -d"
+echo -e "${BLUE}Acesse:${NC} https://${DOMAIN}/academy"
+echo -e "${BLUE}Admin:${NC} julia@lionsleague.com / 123456"
+echo ""
+echo -e "${YELLOW}Comandos úteis:${NC}"
+echo "  pm2 status"
+echo "  pm2 logs academy-api"
+echo "  systemctl restart nginx"
