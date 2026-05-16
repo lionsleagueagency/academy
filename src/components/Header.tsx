@@ -45,7 +45,7 @@ export default function Header({ isAdmin }: HeaderProps) {
 
               <Link to={isAuthenticated ? (isAdmin ? '/admin' : '/dashboard') : '/'} className="flex items-center gap-3 group">
                 <img
-                  src="/academy.png"
+                  src="/academy/academy.png"
                   alt="Lions League Academy"
                   className="relative w-10 h-10 rounded-xl object-cover shadow-lg group-hover:scale-105 transition-transform"
                 />

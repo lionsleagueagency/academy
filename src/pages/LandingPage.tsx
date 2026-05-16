@@ -474,7 +474,7 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               <img
-                src="/academy.png"
+                src="/academy/academy.png"
                 alt="Lions League Academy"
                 className="w-10 h-10 rounded-xl object-cover"
               />

@@ -65,7 +65,7 @@ export default function MobileMenu({ isAdmin, isOpen, onClose }: MobileMenuProps
             <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-3">
                 <img
-                  src="/academy.png"
+                  src="/academy/academy.png"
                   alt="Lions League Academy"
                   className="w-10 h-10 rounded-xl object-cover shadow-lg"
                 />

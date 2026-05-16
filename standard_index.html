@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Lions League Agency | Em Construção</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Poppins',sans-serif;
+    background:#050505;
+    overflow:hidden;
+    color:#fff;
+    height:100vh;
+    position:relative;
+}
+
+/* =======================================================
+BACKGROUND
+======================================================= */
+
+.bg{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+}
+
+.gradient-1{
+    position:absolute;
+    width:700px;
+    height:700px;
+    background:#ff0050;
+    border-radius:50%;
+    filter:blur(180px);
+    opacity:0.18;
+    top:-250px;
+    left:-150px;
+    animation:move1 12s ease-in-out infinite alternate;
+}
+
+.gradient-2{
+    position:absolute;
+    width:700px;
+    height:700px;
+    background:#00f2ea;
+    border-radius:50%;
+    filter:blur(180px);
+    opacity:0.14;
+    bottom:-300px;
+    right:-200px;
+    animation:move2 15s ease-in-out infinite alternate;
+}
+
+.gradient-3{
+    position:absolute;
+    width:400px;
+    height:400px;
+    background:#ffd700;
+    border-radius:50%;
+    filter:blur(150px);
+    opacity:0.08;
+    top:40%;
+    left:50%;
+    transform:translate(-50%,-50%);
+}
+
+@keyframes move1{
+    from{
+        transform:translate(0,0) scale(1);
+    }
+    to{
+        transform:translate(80px,40px) scale(1.1);
+    }
+}
+
+@keyframes move2{
+    from{
+        transform:translate(0,0) scale(1);
+    }
+    to{
+        transform:translate(-70px,-50px) scale(1.2);
+    }
+}
+
+/* =======================================================
+GRID EFFECT
+======================================================= */
+
+.grid{
+    position:absolute;
+    inset:0;
+    background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size:60px 60px;
+    mask-image:linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+}
+
+/* =======================================================
+MAIN CARD
+======================================================= */
+
+.wrapper{
+    position:relative;
+    z-index:10;
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:30px;
+}
+
+.card{
+    width:100%;
+    max-width:1150px;
+    min-height:650px;
+
+    background:rgba(255,255,255,0.05);
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter:blur(25px);
+
+    border-radius:40px;
+
+    overflow:hidden;
+
+    display:flex;
+
+    box-shadow:
+    0 0 50px rgba(255,0,80,0.15),
+    0 0 80px rgba(0,242,255,0.08);
+}
+
+/* =======================================================
+LEFT SIDE
+======================================================= */
+
+.left{
+    width:55%;
+    padding:70px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    position:relative;
+}
+
+.top-badge{
+    width:max-content;
+    padding:10px 22px;
+    border-radius:999px;
+
+    background:rgba(255,255,255,0.08);
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    margin-bottom:30px;
+
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:2px;
+    text-transform:uppercase;
+
+    color:#00f2ea;
+}
+
+h1{
+    font-size:78px;
+    line-height:0.95;
+    font-weight:900;
+    margin-bottom:30px;
+    text-transform:uppercase;
+}
+
+h1 span{
+    background:linear-gradient(90deg,#ffffff,#ffd700);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.description{
+    font-size:17px;
+    line-height:1.9;
+    color:rgba(255,255,255,0.75);
+
+    max-width:540px;
+
+    margin-bottom:40px;
+}
+
+.buttons{
+    display:flex;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.btn-primary{
+    padding:16px 32px;
+    border-radius:18px;
+    text-decoration:none;
+    color:#fff;
+    font-weight:700;
+    background:linear-gradient(90deg,#ff0050,#ff3d87);
+
+    transition:0.4s;
+
+    box-shadow:
+    0 0 20px rgba(255,0,80,0.4);
+}
+
+.btn-primary:hover{
+    transform:translateY(-5px);
+}
+
+.btn-secondary{
+    padding:16px 32px;
+    border-radius:18px;
+    text-decoration:none;
+    color:#fff;
+    font-weight:600;
+
+    border:1px solid rgba(255,255,255,0.1);
+
+    background:rgba(255,255,255,0.04);
+
+    transition:0.4s;
+}
+
+.btn-secondary:hover{
+    background:rgba(255,255,255,0.1);
+    transform:translateY(-5px);
+}
+
+/* =======================================================
+RIGHT SIDE
+======================================================= */
+
+.right{
+    width:45%;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+}
+
+.logo-box{
+    position:relative;
+    width:430px;
+    height:430px;
+
+    border-radius:50%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.logo-ring{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,0.08);
+
+    animation:rotate 14s linear infinite;
+}
+
+.logo-ring::before{
+    content:"";
+    position:absolute;
+    top:-6px;
+    left:50%;
+    transform:translateX(-50%);
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    background:#00f2ea;
+
+    box-shadow:
+    0 0 20px #00f2ea,
+    0 0 40px #00f2ea;
+}
+
+.logo-ring-2{
+    position:absolute;
+    inset:35px;
+    border-radius:50%;
+    border:2px solid rgba(255,255,255,0.06);
+
+    animation:rotateReverse 18s linear infinite;
+}
+
+.logo-ring-2::before{
+    content:"";
+    position:absolute;
+    bottom:-6px;
+    left:50%;
+    transform:translateX(-50%);
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    background:#ff0050;
+
+    box-shadow:
+    0 0 20px #ff0050,
+    0 0 40px #ff0050;
+}
+
+.logo{
+    width:300px;
+    position:relative;
+    z-index:5;
+
+    filter:
+    drop-shadow(0 0 25px rgba(255,215,0,0.35));
+
+    animation:floating 5s ease-in-out infinite;
+}
+
+@keyframes rotate{
+    from{
+        transform:rotate(0deg);
+    }
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+@keyframes rotateReverse{
+    from{
+        transform:rotate(360deg);
+    }
+    to{
+        transform:rotate(0deg);
+    }
+}
+
+@keyframes floating{
+    0%{
+        transform:translateY(0px);
+    }
+    50%{
+        transform:translateY(-18px);
+    }
+    100%{
+        transform:translateY(0px);
+    }
+}
+
+/* =======================================================
+BOTTOM INFO
+======================================================= */
+
+.footer-info{
+    position:absolute;
+    bottom:35px;
+    left:70px;
+
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+}
+
+.info-card{
+    padding:14px 18px;
+    border-radius:18px;
+
+    background:rgba(255,255,255,0.04);
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    font-size:13px;
+    color:rgba(255,255,255,0.8);
+}
+
+/* =======================================================
+RESPONSIVE
+======================================================= */
+
+@media(max-width:980px){
+
+    body{
+        overflow:auto;
+    }
+
+    .card{
+        flex-direction:column;
+        min-height:auto;
+    }
+
+    .left{
+        width:100%;
+        padding:50px 35px;
+    }
+
+    .right{
+        width:100%;
+        padding:40px 20px 70px;
+    }
+
+    h1{
+        font-size:54px;
+    }
+
+    .logo-box{
+        width:320px;
+        height:320px;
+    }
+
+    .logo{
+        width:220px;
+    }
+
+    .footer-info{
+        position:relative;
+        left:0;
+        bottom:0;
+        margin-top:40px;
+    }
+}
+
+@media(max-width:600px){
+
+    h1{
+        font-size:42px;
+    }
+
+    .description{
+        font-size:15px;
+    }
+
+    .buttons{
+        flex-direction:column;
+    }
+
+    .btn-primary,
+    .btn-secondary{
+        width:100%;
+        text-align:center;
+    }
+}
+
+</style>
+</head>
+<body>
+
+<div class="bg">
+    <div class="gradient-1"></div>
+    <div class="gradient-2"></div>
+    <div class="gradient-3"></div>
+    <div class="grid"></div>
+</div>
+
+<div class="wrapper">
+
+    <div class="card">
+
+        <div class="left">
+
+            <div class="top-badge">
+                Lions League Agency
+            </div>
+
+            <h1>
+                Site em <span>Construção</span>
+            </h1>
+
+            <p class="description">
+                A Lions League Agency está preparando uma plataforma premium
+                para criadores TikTok LIVE. Em breve você terá acesso a suporte,
+                treinamento, eventos, batalhas oficiais e uma experiência
+                totalmente diferenciada.
+            </p>
+
+            <div class="buttons">
+                <a href="https://wa.me/5531999372191?text=Ol%C3%A1!%20Quero%20saber%20mais%20sobre%20a%20ag%C3%AAncia." class="btn-primary">
+                    Entrar em Contato
+                </a>
+
+                <a href="https://tiktok.com/@lionsleagueagency" class="btn-secondary">
+                    Conta Oficial
+                </a>
+            </div>
+
+        </div>
+
+        <div class="right">
+
+            <div class="logo-box">
+
+                <div class="logo-ring"></div>
+                <div class="logo-ring-2"></div>
+
+                <!-- TROQUE PELO CAMINHO DA SUA LOGO -->
+                <img src="https://i.ibb.co/99qwpFZy/Chat-GPT-Image-27-de-mar-de-2026-16-07-10-removebg-preview.png" class="logo" alt="Lions League Agency">
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

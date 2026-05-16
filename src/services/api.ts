@@ -1,4 +1,4 @@
-const API_URL = '/api/v1';
+const API_URL = 'https://overlive.com.br/academy/api/v1';
 
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
   const token = localStorage.getItem('lions-token');

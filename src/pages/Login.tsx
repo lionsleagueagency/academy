@@ -49,7 +49,7 @@ export default function Login() {
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-3 mb-6">
             <img
-              src="/academy.png"
+              src="/academy/academy.png"
               alt="Lions League Academy"
               className="w-12 h-12 rounded-2xl object-cover shadow-lg"
             />
